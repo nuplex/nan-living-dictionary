@@ -167,6 +167,7 @@ class App extends React.Component{
                                     <div className="changing-english-cont">
                                         <input type="test"
                                                onChange={this.onChangeChangingEnglish}
+                                               onKeyDown={(e) =>{if (e.key === 'Enter') this.stopChangingEnglish(entry.word)}}
                                                value={changingEnglishValue}
                                         />
                                         <button onClick={() => this.stopChangingEnglish(entry.word)}>Submit</button>
