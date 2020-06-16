@@ -11,7 +11,7 @@ export default class Generator {
         this.verb = `shi'`
     }
 
-    createWord(syllables, english, type){
+    createWord(syllables, english, type, collisionPreventer){
         let word = '';
 
         switch(type){
@@ -25,18 +25,38 @@ export default class Generator {
                 break;
         }
 
-        word += this.initial();
+        let coreProcess = () => {
+            let toReturn = word;
+            toReturn += this.initial();
 
-        if (syllables >= 2){
-            let left = syllables - 2; //minus initial and final
+            if (syllables >= 2){
+                let left = syllables - 2; //minus initial and final
 
-            while(left > 0){
-                word += this.medial();
-                --left;
+                while(left > 0){
+                    toReturn += this.medial();
+                    --left;
+                }
+            }
+
+            toReturn += this.final();
+
+            return toReturn;
+        };
+
+        let isDuplicate = true;
+
+        while(isDuplicate){
+            let generated = coreProcess();
+            isDuplicate = false;
+
+            if (collisionPreventer) {
+                isDuplicate = collisionPreventer.indexOf(generated) !== -1;
+            }
+
+            if(!isDuplicate){
+                word = generated;
             }
         }
-
-        word += this.final();
 
         return word;
     }

@@ -25,6 +25,10 @@ export default class Dictionary{
 
     }
 
+    getOnlyWords(){
+        return this.words.map(w => w.word);
+    }
+
     getWords(){
         return this.words.filter((w) => w);
     }

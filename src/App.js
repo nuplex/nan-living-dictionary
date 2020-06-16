@@ -32,7 +32,7 @@ class App extends React.Component{
 
     add(){
         let gen = new Generator();
-        let word = gen.createWord(this.state.syllables, this.state.english, this.state.wordType);
+        let word = gen.createWord(this.state.syllables, this.state.english, this.state.wordType, this.state.dict.getOnlyWords());
 
         this.onChangeDictionary(word, this.state.english, this.state.wordType);
     }

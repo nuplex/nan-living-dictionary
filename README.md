@@ -10,6 +10,7 @@ Lots of scratch code here right now
 ### Working On
 
 - Generate from root
-  - Create root
-  - Edit english of root
+  - ~~Create root~~
+  - ~~Edit english of root~~
   - Generate word with root
+- ~~Regenerate on collision/No duplicates~~

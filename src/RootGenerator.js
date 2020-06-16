@@ -20,7 +20,7 @@ class RootGenerator extends React.Component{
 
     add(){
         let gen = new Generator();
-        let word = gen.createWord(this.state.syllables, this.state.english, 'ROOT');
+        let word = gen.createWord(this.state.syllables, this.state.english, 'ROOT', this.props.dict.getOnlyWords());
 
         this.props.onChangeDictionary(word, this.state.english, 'ROOT');
 
