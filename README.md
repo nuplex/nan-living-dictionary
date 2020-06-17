@@ -18,13 +18,15 @@ Lots of scratch code here right now
 
 ### Queue
 
-- Fix delete WILD deletes all WILDs
+- Fix double WILD in combiner
+    - Go through array first to transform wilds before combining operation
 - Migrate to SASS
 - Add Adjective/Verb type to root generation
 - Add non-roots to root generation
-- Add word to dictionary without generation
-- Add grammar points (green)
 - Add generate syllable for individual wild cards in combine roots
-    - Remove option for wild syllables if no wild syllables
+    - Remove option for wild syllables if no WILD
 - Add collision detection to combine roots
+- Fix delete WILD deletes all WILDs
+- Add word to dictionary without generation
 - Save and retrieve from storage
+- Add grammar points (green)

@@ -96,7 +96,7 @@ class RootCombiner extends React.Component{
                 </div>
                 <div className="roots-area">
                     {roots.map((root, i) => {
-                        if(currentRoots.indexOf(root.word) !== -1 && root.word !== 'WILD'){
+                        if(currentRoots.filter(r => r.word === root.word).length !== 0 && root.word !== 'WILD'){
                             return null;
                         }
 

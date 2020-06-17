@@ -65,7 +65,15 @@ export default class Generator {
         //roots are add like root 2 + root 1
         //roots with boundaries like VV become VCV where C = y
         //roots with boundaries like CC become CVC where V = i
-        let onlyRoots = roots.map((r) => r.word);
+        let onlyRoots = roots.map((r) => {
+            let w  = r.word;
+
+            if (r.word === 'WILD') {
+                w = this.createWord(wildSyllables, english, type, collisionDetector);
+            }
+
+            return w;
+        });
 
         const getLastChar = root => root[root.length - 1];
         const getFirstChar = root => root[0];
@@ -84,8 +92,6 @@ export default class Generator {
 
         for(let i = 0; i < onlyRoots.length; i++){
             let root = onlyRoots[i];
-
-            root = root === 'WILD' ? this.createWord(wildSyllables, english, type, collisionDetector) : root;
 
             if (i === onlyRoots.length - 1) {
                 word += root;
