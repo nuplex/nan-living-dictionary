@@ -27,3 +27,4 @@ Lots of scratch code here right now
 - Add generate syllable for individual wild cards in combine roots
     - Remove option for wild syllables if no wild syllables
 - Add collision detection to combine roots
+- Save and retrieve from storage

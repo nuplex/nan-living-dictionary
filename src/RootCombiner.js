@@ -30,7 +30,7 @@ class RootCombiner extends React.Component{
 
     add(){
         let gen = new Generator();
-        let word = gen.createWordFromRoots(this.state.currentRoots, this.state.wildSyllables, this.state.english, null, this.props.dict);
+        let word = gen.createWordFromRoots(this.state.currentRoots, this.state.wildSyllables, this.state.english, null, this.props.dict.getOnlyWords());
 
         this.props.onChangeDictionary(word, this.state.english, null);
     }
