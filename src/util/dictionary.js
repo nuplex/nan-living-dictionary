@@ -1,3 +1,5 @@
+import WORD_TYPES from "../word-types";
+
 export default class Dictionary{
     constructor(copyFrom){
         copyFrom = (copyFrom instanceof Dictionary) ? copyFrom : null;
@@ -27,6 +29,10 @@ export default class Dictionary{
 
     getOnlyWords(){
         return this.words.map(w => w.word);
+    }
+
+    getRoots(){
+        return this.words.filter(w => w.type === WORD_TYPES.ROOT);
     }
 
     getWords(){

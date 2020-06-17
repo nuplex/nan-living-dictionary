@@ -11,7 +11,7 @@ export default class Generator {
         this.verb = `shi'`
     }
 
-    createWord(syllables, english, type, collisionPreventer){
+    createWord(syllables, english, type, collisionDetector){
         let word = '';
 
         switch(type){
@@ -49,12 +49,48 @@ export default class Generator {
             let generated = coreProcess();
             isDuplicate = false;
 
-            if (collisionPreventer) {
-                isDuplicate = collisionPreventer.indexOf(generated) !== -1;
+            if (collisionDetector) {
+                isDuplicate = collisionDetector.indexOf(generated) !== -1;
             }
 
             if(!isDuplicate){
                 word = generated;
+            }
+        }
+
+        return word;
+    }
+
+    createWordFromRoots(roots, wildSyllables, english, type, collisionDetector){
+        //roots are add like root 2 + root 1
+        //roots with boundaries like VV become VCV where C = y
+        //roots with boundaries like CC become CVC where V = i
+        let onlyRoots = roots.map((r) => r.word);
+
+        const getLastChar = root => root[root.length - 1];
+        const getFirstChar = root => root[0];
+        const isVowel =  char => this.vowels.indexOf(char) !== -1;
+        const generateBoundary = (a, b) => {
+            if(isVowel(getLastChar(a)) && isVowel(getFirstChar(b))){
+                return 'y';
+            } else if (!isVowel(getLastChar(a)) && !isVowel(getFirstChar(b))) {
+                return 'i';
+            }
+
+            return '';
+        };
+
+        let word = '';
+
+        for(let i = 0; i < onlyRoots.length; i++){
+            let root = onlyRoots[i];
+
+            root = root === 'WILD' ? this.createWord(wildSyllables, english, type, collisionDetector) : root;
+
+            if (i === onlyRoots.length - 1) {
+                word += root;
+            } else {
+                word += root + generateBoundary(root, onlyRoots[i + 1]);
             }
         }
 

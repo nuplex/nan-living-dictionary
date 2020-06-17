@@ -45,6 +45,19 @@ body {
     padding: 2px 3px;
 }
 
+.tab {
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.tab:hover {
+    text-decoration: underline;
+}
+
+.tab__active {
+    text-decoration: underline;
+}
+
 .type {
     display: inline-block;
 }

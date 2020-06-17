@@ -4,8 +4,9 @@ import './App.css';
 import Dictionary from "./util/dictionary";
 import RootGenerator from "./RootGenerator";
 import WORD_TYPES from "./word-types";
+import RootCombiner from "./RootCombiner";
 
-class App extends React.Component{
+class App extends React.Component {
     constructor(props) {
         super(props);
 
@@ -17,7 +18,8 @@ class App extends React.Component{
             english: '???',
             dict: new Dictionary(),
             changingEnglishIndex: -1,
-            changingEnglishValue: ''
+            changingEnglishValue: '',
+            currentTab: 0
         };
 
         this.add = this.add.bind(this);
@@ -27,18 +29,19 @@ class App extends React.Component{
         this.changeEnglish = this.changeEnglish.bind(this);
         this.onChangeChangingEnglish = this.onChangeChangingEnglish.bind(this);
         this.stopChangingEnglish = this.stopChangingEnglish.bind(this);
-        this.onChangeDictionary = this.onChangeDictionary.bind(this)
+        this.onChangeDictionary = this.onChangeDictionary.bind(this);
+        this.changeTab = this.changeTab.bind(this);
     }
 
-    add(){
+    add() {
         let gen = new Generator();
         let word = gen.createWord(this.state.syllables, this.state.english, this.state.wordType, this.state.dict.getOnlyWords());
 
         this.onChangeDictionary(word, this.state.english, this.state.wordType);
     }
 
-    changeEnglish(index, value){
-        if(this.state.changingEnglishIndex === - 1) {
+    changeEnglish(index, value) {
+        if (this.state.changingEnglishIndex === -1) {
             this.setState({
                 changingEnglishIndex: index,
                 changingEnglishValue: value
@@ -46,7 +49,15 @@ class App extends React.Component{
         }
     }
 
-    onChangeDictionary(word, english, type){
+    changeTab(tab) {
+        if(this.state.currentTab !== tab){
+            this.setState({
+                currentTab: tab
+            });
+        }
+    }
+
+    onChangeDictionary(word, english, type) {
         let newDict = new Dictionary(this.state.dict);
         newDict.addWord(word, english, type);
 
@@ -103,7 +114,7 @@ class App extends React.Component{
         }
     }
 
-    stopChangingEnglish(word){
+    stopChangingEnglish(word) {
         let newDict = new Dictionary(this.state.dict);
         newDict.changeEnglish(word, this.state.changingEnglishValue);
 
@@ -114,14 +125,52 @@ class App extends React.Component{
         })
     }
 
-    render() {
-        const {adjectiveActive, verbActive, dict, syllables, english, changingEnglishIndex, changingEnglishValue} = this.state;
+    renderDictionary() {
+        const {dict, changingEnglishIndex, changingEnglishValue} = this.state;
+
+        return (
+            <div className="dict-cont">
+                {dict.getWords().map((entry, i) => {
+                    let isRoot = entry.type === WORD_TYPES.ROOT;
+                    let nanEntryClass = !isRoot ? 'nan-entry' : 'nan-entry__root';
+
+                    return (
+                        <div className="entry" key={i + entry.word}>
+                            <span className={nanEntryClass}>{entry.word}</span>
+                            <span>{' '}</span>
+                            {(changingEnglishIndex !== i) ?
+                                <span className="english-entry"
+                                      onClick={() => this.changeEnglish(i, entry.english)}
+                                >{entry.english}</span>
+                                :
+                                <div className="changing-english-cont">
+                                    <input type="test"
+                                           onChange={this.onChangeChangingEnglish}
+                                           onKeyDown={(e) => {
+                                               if (e.key === 'Enter') this.stopChangingEnglish(entry.word)
+                                           }}
+                                           value={changingEnglishValue}
+                                    />
+                                    <button onClick={() => this.stopChangingEnglish(entry.word)}>Submit</button>
+                                </div>
+                            }
+                            {isRoot &&
+                            <div className="root-badge">root</div>
+                            }
+                        </div>
+                    )
+                })}
+            </div>
+        )
+    }
+
+    renderMainGenerator() {
+        const {adjectiveActive, verbActive, dict, syllables, english} = this.state;
         const adjectiveClass = "option" + (adjectiveActive ? "__active" : "");
         const verbClass = "option" + (verbActive ? "__active" : "");
 
         return (
-            <div className="main">
-                <h1>Nan Living Dictionary</h1>
+            <React.Fragment>
                 <div className="add-cont">
                     <label htmlFor="syllables">
                         <input name="syllables"
@@ -139,47 +188,47 @@ class App extends React.Component{
                     </label>
                     <div className="type">
                         <div className={adjectiveClass}
-                           onClick={() => this.toggleActive('ADJ')}
-                        >Adjective</div>
+                             onClick={() => this.toggleActive('ADJ')}
+                        >Adjective
+                        </div>
                         <div className={verbClass}
-                           onClick={() => this.toggleActive('VRB')}
-                        >Verb</div>
+                             onClick={() => this.toggleActive('VRB')}
+                        >Verb
+                        </div>
                     </div>
                     <button onClick={this.add}>Add Word</button>
                 </div>
                 <RootGenerator dict={dict}
                                onChangeDictionary={this.onChangeDictionary}
                 />
-                <div className="dict-cont">
-                    {dict.getWords().map((entry, i) => {
-                        let isRoot = entry.type === WORD_TYPES.ROOT;
-                        let nanEntryClass =  !isRoot ? 'nan-entry' : 'nan-entry__root';
+            </React.Fragment>
+        )
+    }
 
-                        return (
-                            <div className="entry" key={i + entry.word}>
-                                <span className={nanEntryClass}>{entry.word}</span>
-                                <span>{' '}</span>
-                                { (changingEnglishIndex !== i) ?
-                                    <span className="english-entry"
-                                          onClick={() => this.changeEnglish(i, entry.english)}
-                                    >{entry.english}</span>
-                                    :
-                                    <div className="changing-english-cont">
-                                        <input type="test"
-                                               onChange={this.onChangeChangingEnglish}
-                                               onKeyDown={(e) =>{if (e.key === 'Enter') this.stopChangingEnglish(entry.word)}}
-                                               value={changingEnglishValue}
-                                        />
-                                        <button onClick={() => this.stopChangingEnglish(entry.word)}>Submit</button>
-                                    </div>
-                                }
-                                { isRoot &&
-                                    <div className="root-badge">root</div>
-                                }
-                            </div>
-                        )
-                    })}
+    render() {
+        const {currentTab, dict} = this.state;
+        let tabActive = (tab) => tab === currentTab ? 'tab__active':'tab';
+
+        return (
+            <div className="main">
+                <h1>Nan Living Dictionary</h1>
+                <div>
+                    <span className={tabActive(0)}
+                          onClick={() => this.changeTab(0)}>Generate</span>
+                    {` `}
+                    <span className={tabActive(1)}
+                          onClick={() => this.changeTab(1)}>Combine</span>
                 </div>
+                {currentTab === 0 &&
+                    this.renderMainGenerator()
+                }
+                {currentTab === 1 &&
+                    <RootCombiner
+                        dict={dict}
+                        onChangeDictionary={this.onChangeDictionary}
+                    />
+                }
+                {this.renderDictionary()}
             </div>
         );
     }
