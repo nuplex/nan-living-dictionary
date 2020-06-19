@@ -34,6 +34,7 @@ class App extends React.Component {
         this.changeTab = this.changeTab.bind(this);
         this.onSearch = this.onSearch.bind(this);
         this.onLeaveSearch = this.onLeaveSearch.bind(this);
+        this.deleteWord = this.deleteWord.bind(this);
     }
 
     add() {
@@ -50,6 +51,15 @@ class App extends React.Component {
                 changingEnglishValue: value
             })
         }
+    }
+
+    deleteWord(word) {
+        this.state.dict.deleteWord(word);
+        const newDict = new Dictionary(this.state.dict);
+        this.setState({
+            dict: newDict,
+            changingEnglishIndex: -1 // this option is also open at the moment at this index
+        });
     }
 
     changeTab(tab) {
@@ -175,7 +185,8 @@ class App extends React.Component {
                                            }}
                                            value={changingEnglishValue}
                                     />
-                                    <button onClick={() => this.stopChangingEnglish(entry.word)}>Submit</button>
+                                    <button onClick={() => this.stopChangingEnglish(entry.word)}>Change English</button>
+                                    <button onClick={() => this.deleteWord(entry.word)}>Delete Word</button>
                                 </div>
                             }
                             {isRoot &&

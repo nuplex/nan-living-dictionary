@@ -2,13 +2,10 @@
 
 Lots of scratch code here right now
 
-### Current Features:
+### Queue
 
-- Generate word
-- Edit english of generated word
-
-### Working On
-
+~~- Generate word~~
+~~- Edit english of generated word~~
 - ~~Generate from root~~
   - ~~Create root~~
   - ~~Edit english of root~~
@@ -17,12 +14,11 @@ Lots of scratch code here right now
 - ~~Press enter to submit english change~~
 - ~~Fix double WILD in combiner~~
     - ~~Go through array first to transform wilds before combining operation~~
-
-### Queue
-
 ~~- Migrate to SASS~~
 ~~- Add Search~~
-- Add Delete
+~~- Add delete word functionality~~
+- Fix combine allows duplicates
+- Save and retrieve from storage
 - Add Adjective/Verb type to root generation
 - Add non-roots to root generation
 - Add generate syllable for individual wild cards in combine roots
@@ -30,5 +26,4 @@ Lots of scratch code here right now
 - Add collision detection to combine roots
 - Fix delete WILD deletes all WILDs
 - Add word to dictionary without generation
-- Save and retrieve from storage
-- Add grammar points (green)
+- Add writing native script playground
