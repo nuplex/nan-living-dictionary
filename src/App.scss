@@ -84,3 +84,18 @@ body {
     font-family: sans-serif;
     font-size: 14px;
 }
+
+.undo-delete-button {
+    background-color: #ffeac4;
+    border-radius: 2px;
+    bottom: 2rem;
+    color: #3e3930;
+    cursor: pointer;
+    font-size: 14px;
+    left: 2rem;
+    padding: 4px 0;
+    position: fixed;
+    text-align: center;
+    width: 100px;
+    z-index: 1;
+}

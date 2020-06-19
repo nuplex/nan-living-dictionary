@@ -5,6 +5,7 @@ import Dictionary from "./util/dictionary";
 import RootGenerator from "./RootGenerator";
 import WORD_TYPES from "./word-types";
 import RootCombiner from "./RootCombiner";
+import UndoDeleteStore from "./util/undo-delete-store";
 
 class App extends React.Component {
     constructor(props) {
@@ -17,6 +18,8 @@ class App extends React.Component {
             syllables: 2,
             english: '???',
             dict: new Dictionary(),
+            canUndo: false,
+            undoDeleteStore: new UndoDeleteStore(),
             changingEnglishIndex: -1,
             changingEnglishValue: '',
             currentTab: 0,
@@ -24,17 +27,18 @@ class App extends React.Component {
         };
 
         this.add = this.add.bind(this);
-        this.onChangeSyllables = this.onChangeSyllables.bind(this);
-        this.onChangeEnglish = this.onChangeEnglish.bind(this);
-        this.toggleActive = this.toggleActive.bind(this);
         this.changeEnglish = this.changeEnglish.bind(this);
-        this.onChangeChangingEnglish = this.onChangeChangingEnglish.bind(this);
-        this.stopChangingEnglish = this.stopChangingEnglish.bind(this);
-        this.onChangeDictionary = this.onChangeDictionary.bind(this);
         this.changeTab = this.changeTab.bind(this);
-        this.onSearch = this.onSearch.bind(this);
-        this.onLeaveSearch = this.onLeaveSearch.bind(this);
         this.deleteWord = this.deleteWord.bind(this);
+        this.onChangeChangingEnglish = this.onChangeChangingEnglish.bind(this);
+        this.onChangeDictionary = this.onChangeDictionary.bind(this);
+        this.onChangeEnglish = this.onChangeEnglish.bind(this);
+        this.onChangeSyllables = this.onChangeSyllables.bind(this);
+        this.onLeaveSearch = this.onLeaveSearch.bind(this);
+        this.onSearch = this.onSearch.bind(this);
+        this.onUndoDelete = this.onUndoDelete.bind(this);
+        this.stopChangingEnglish = this.stopChangingEnglish.bind(this);
+        this.toggleActive = this.toggleActive.bind(this);
     }
 
     add() {
@@ -53,15 +57,6 @@ class App extends React.Component {
         }
     }
 
-    deleteWord(word) {
-        this.state.dict.deleteWord(word);
-        const newDict = new Dictionary(this.state.dict);
-        this.setState({
-            dict: newDict,
-            changingEnglishIndex: -1 // this option is also open at the moment at this index
-        });
-    }
-
     changeTab(tab) {
         if(this.state.currentTab !== tab){
 
@@ -73,6 +68,17 @@ class App extends React.Component {
                 currentTab: tab
             });
         }
+    }
+
+    deleteWord(word) {
+        this.state.undoDeleteStore.put(word);
+        this.state.dict.deleteWord(word.word);
+        const newDict = new Dictionary(this.state.dict);
+        this.setState({
+            dict: newDict,
+            changingEnglishIndex: -1, // this option is also open at the moment at this index
+            canUndo: true
+        });
     }
 
     onChangeDictionary(word, english, type) {
@@ -113,6 +119,14 @@ class App extends React.Component {
         this.setState({
             search: event.target.value
         });
+    }
+
+    onUndoDelete() {
+        const word = this.state.undoDeleteStore.get();
+        console.log(word);
+        this.setState({
+            canUndo: false
+        }, () => this.onChangeDictionary(word.word, word.english, word.type))
     }
 
     toggleActive(type) {
@@ -186,7 +200,7 @@ class App extends React.Component {
                                            value={changingEnglishValue}
                                     />
                                     <button onClick={() => this.stopChangingEnglish(entry.word)}>Change English</button>
-                                    <button onClick={() => this.deleteWord(entry.word)}>Delete Word</button>
+                                    <button onClick={() => this.deleteWord(entry)}>Delete Word</button>
                                 </div>
                             }
                             {isRoot &&
@@ -257,7 +271,7 @@ class App extends React.Component {
     }
 
     render() {
-        const {currentTab, dict, search} = this.state;
+        const {currentTab, dict, search, canUndo} = this.state;
         let tabActive = (tab) => tab === currentTab ? 'tab__active':'tab';
 
         return (
@@ -286,6 +300,11 @@ class App extends React.Component {
                     this.renderSearch()
                 }
                 {this.renderDictionary(search === '' ? null : search)}
+                {canUndo &&
+                    <div className="undo-delete-button"
+                         onClick={this.onUndoDelete}
+                    >Undo Delete</div>
+                }
             </div>
         );
     }

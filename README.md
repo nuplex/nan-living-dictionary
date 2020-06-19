@@ -17,6 +17,7 @@ Lots of scratch code here right now
 ~~- Migrate to SASS~~
 ~~- Add Search~~
 ~~- Add delete word functionality~~
+~~- Add undo delete functionality~~
 - Fix combine allows duplicates
 - Save and retrieve from storage
 - Add Adjective/Verb type to root generation
