@@ -12,7 +12,9 @@ class RootCombiner extends React.Component{
             currentRoots: [],
             roots: [],
             wildSyllables: 2,
-            english: '???'
+            english: '???',
+            wordExists: false,
+            maxedOutOnGenerating: false
         };
 
         this.add = this.add.bind(this);
@@ -31,6 +33,31 @@ class RootCombiner extends React.Component{
     add(){
         let gen = new Generator();
         let word = gen.createWordFromRoots(this.state.currentRoots, this.state.wildSyllables, this.state.english, null, this.props.dict.getOnlyWords());
+        const failure = (on) => {
+            setTimeout(() => {
+                this.setState({
+                    [on]: false
+                })
+            }, 3000)
+        };
+
+        if(word === null){
+            this.setState({
+                currentRoots: [],
+                english: '???',
+                wordExists: true
+            }, () => failure('wordExists'));
+
+            return;
+        }
+
+        if(word === '_MAXED_OUT_'){
+            this.setState({
+                maxedOutOnGenerating: true
+            }, () => failure('maxedOutOnGenerating'));
+
+            return;
+        }
 
         this.props.onChangeDictionary(word, this.state.english, null);
     }
@@ -61,7 +88,7 @@ class RootCombiner extends React.Component{
     }
 
     render(){
-        const {currentRoots, roots, wildSyllables, english} = this.state;
+        const {currentRoots, english, maxedOutOnGenerating, roots, wildSyllables, wordExists} = this.state;
 
         return (
             <div className="root-combiner-cont">
@@ -93,6 +120,8 @@ class RootCombiner extends React.Component{
                     <button onClick={this.add}
                             disabled={currentRoots.length < 2}
                     >Create Word</button>
+                    {wordExists && <span>This word exists already.</span>}
+                    {maxedOutOnGenerating && <span>Generation failed. There may be too many similar words.</span>}
                 </div>
                 <div className="roots-area">
                     {roots.map((root, i) => {

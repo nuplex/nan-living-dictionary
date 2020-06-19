@@ -44,6 +44,7 @@ export default class Generator {
         };
 
         let isDuplicate = true;
+        let maxCheck = 20;
 
         while(isDuplicate){
             let generated = coreProcess();
@@ -56,24 +57,35 @@ export default class Generator {
             if(!isDuplicate){
                 word = generated;
             }
+
+            --maxCheck;
+            if(maxCheck <= 0){
+                throw new Error('_MAXED_OUT_');
+            }
         }
 
         return word;
     }
 
     createWordFromRoots(roots, wildSyllables, english, type, collisionDetector){
+        let usingWild = false;
         //roots are add like root 2 + root 1
         //roots with boundaries like VV become VCV where C = y
         //roots with boundaries like CC become CVC where V = i
-        let onlyRoots = roots.map((r) => {
-            let w  = r.word;
+        const wildReplacement = (roots) => {
+            return roots.map((r) => {
+                let w = r.word;
 
-            if (r.word === 'WILD') {
-                w = this.createWord(wildSyllables, english, type, collisionDetector);
-            }
+                if (r.word === 'WILD') {
+                    usingWild = true;
+                    w = this.createWord(wildSyllables, english, type, null); //no need to collision detect here, I think
+                }
 
-            return w;
-        });
+                return w;
+            });
+        };
+
+        let onlyRoots = wildReplacement(roots);
 
         const getLastChar = root => root[root.length - 1];
         const getFirstChar = root => root[0];
@@ -88,15 +100,45 @@ export default class Generator {
             return '';
         };
 
+        const generate = () => {
+            let word = '';
+
+            for (let i = 0; i < onlyRoots.length; i++) {
+                let root = onlyRoots[i];
+
+                if (i === onlyRoots.length - 1) {
+                    word += root;
+                } else {
+                    word += root + generateBoundary(root, onlyRoots[i + 1]);
+                }
+            }
+
+            return word;
+        };
+
+        let isDuplicate = true;
+        let maxCheck = 5;
         let word = '';
+        while(isDuplicate){
+            let generated = generate();
+            isDuplicate = false;
 
-        for(let i = 0; i < onlyRoots.length; i++){
-            let root = onlyRoots[i];
+            if (collisionDetector) {
+                isDuplicate = collisionDetector.indexOf(generated) !== -1;
+            }
 
-            if (i === onlyRoots.length - 1) {
-                word += root;
-            } else {
-                word += root + generateBoundary(root, onlyRoots[i + 1]);
+            if (!isDuplicate) {
+                word = generated;
+            } else if(isDuplicate && !usingWild) {
+                word = null;
+                isDuplicate = false;
+            } else if (isDuplicate && usingWild) {
+                onlyRoots = wildReplacement(roots);
+            }
+
+            --maxCheck;
+            if (maxCheck <= 0) {
+                return '_MAXED_OUT_';
             }
         }
 

@@ -123,7 +123,6 @@ class App extends React.Component {
 
     onUndoDelete() {
         const word = this.state.undoDeleteStore.get();
-        console.log(word);
         this.setState({
             canUndo: false
         }, () => this.onChangeDictionary(word.word, word.english, word.type))
