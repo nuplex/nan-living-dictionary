@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Generator from './util/generator.js';
-import './root-combiner.css';
+import './root-combiner.scss';
 import Dictionary from "./util/dictionary";
 
 class RootCombiner extends React.Component{

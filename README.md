@@ -15,12 +15,14 @@ Lots of scratch code here right now
   - ~~Generate word with root~~
 - ~~Regenerate on collision/No duplicates~~
 - ~~Press enter to submit english change~~
+- ~~Fix double WILD in combiner~~
+    - ~~Go through array first to transform wilds before combining operation~~
 
 ### Queue
 
-- Fix double WILD in combiner
-    - Go through array first to transform wilds before combining operation
-- Migrate to SASS
+~~- Migrate to SASS~~
+~~- Add Search~~
+- Add Delete
 - Add Adjective/Verb type to root generation
 - Add non-roots to root generation
 - Add generate syllable for individual wild cards in combine roots

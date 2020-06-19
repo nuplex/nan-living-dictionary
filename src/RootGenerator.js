@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Generator from './util/generator.js';
-import './App.css';
+import './App.scss';
 import Dictionary from "./util/dictionary";
 
 class RootGenerator extends React.Component{

@@ -1,6 +1,6 @@
 import React from 'react';
 import Generator from './util/generator.js';
-import './App.css';
+import './App.scss';
 import Dictionary from "./util/dictionary";
 import RootGenerator from "./RootGenerator";
 import WORD_TYPES from "./word-types";
@@ -19,7 +19,8 @@ class App extends React.Component {
             dict: new Dictionary(),
             changingEnglishIndex: -1,
             changingEnglishValue: '',
-            currentTab: 0
+            currentTab: 0,
+            search: ''
         };
 
         this.add = this.add.bind(this);
@@ -31,6 +32,8 @@ class App extends React.Component {
         this.stopChangingEnglish = this.stopChangingEnglish.bind(this);
         this.onChangeDictionary = this.onChangeDictionary.bind(this);
         this.changeTab = this.changeTab.bind(this);
+        this.onSearch = this.onSearch.bind(this);
+        this.onLeaveSearch = this.onLeaveSearch.bind(this);
     }
 
     add() {
@@ -51,6 +54,11 @@ class App extends React.Component {
 
     changeTab(tab) {
         if(this.state.currentTab !== tab){
+
+            if (this.state.currentTab === 2) {
+                this.onLeaveSearch();
+            }
+
             this.setState({
                 currentTab: tab
             });
@@ -82,6 +90,18 @@ class App extends React.Component {
     onChangeSyllables(event) {
         this.setState({
             syllables: parseInt(event.target.value)
+        });
+    }
+
+    onLeaveSearch() {
+        this.setState({
+            search: ''
+        });
+    }
+
+    onSearch(event) {
+        this.setState({
+            search: event.target.value
         });
     }
 
@@ -125,12 +145,16 @@ class App extends React.Component {
         })
     }
 
-    renderDictionary() {
+    renderDictionary(search) {
         const {dict, changingEnglishIndex, changingEnglishValue} = this.state;
 
         return (
             <div className="dict-cont">
                 {dict.getWords().map((entry, i) => {
+                    if (search && !entry.word.includes(search) && !entry.english.includes(search)) {
+                       return null;
+                    }
+
                     let isRoot = entry.type === WORD_TYPES.ROOT;
                     let nanEntryClass = !isRoot ? 'nan-entry' : 'nan-entry__root';
 
@@ -205,8 +229,24 @@ class App extends React.Component {
         )
     }
 
+    renderSearch(){
+        const { search } = this.state;
+
+        return (
+            <div className="search">
+                <label htmlFor="search">
+                    <input name="search"
+                           type="text"
+                           onChange={this.onSearch}
+                           value={search}
+                    />
+                </label>
+            </div>
+        )
+    }
+
     render() {
-        const {currentTab, dict} = this.state;
+        const {currentTab, dict, search} = this.state;
         let tabActive = (tab) => tab === currentTab ? 'tab__active':'tab';
 
         return (
@@ -218,6 +258,9 @@ class App extends React.Component {
                     {` `}
                     <span className={tabActive(1)}
                           onClick={() => this.changeTab(1)}>Combine</span>
+                    {` `}
+                    <span className={tabActive(2)}
+                          onClick={() => this.changeTab(2)}>Search</span>
                 </div>
                 {currentTab === 0 &&
                     this.renderMainGenerator()
@@ -228,7 +271,10 @@ class App extends React.Component {
                         onChangeDictionary={this.onChangeDictionary}
                     />
                 }
-                {this.renderDictionary()}
+                {currentTab === 2 &&
+                    this.renderSearch()
+                }
+                {this.renderDictionary(search === '' ? null : search)}
             </div>
         );
     }
