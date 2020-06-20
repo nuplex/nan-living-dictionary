@@ -18,6 +18,7 @@ class App extends React.Component {
             changingEnglishIndex: -1,
             changingEnglishValue: '',
             currentTab: 0,
+            deleteOnServerStack: [],
             dict: new Dictionary(),
             english: '???',
             saveText: 'Save',
@@ -47,8 +48,13 @@ class App extends React.Component {
     componentDidMount() {
         Api.load()
             .then((res) => {
+                const words = res.dictionary;
+                words.sort((a, b) => {
+                    return a.word.localeCompare(b.word);
+                });
+
                 this.setState({
-                    dict: new Dictionary(res.dictionary)
+                    dict: new Dictionary(words)
                 });
             })
             .catch((error) => {
@@ -87,6 +93,7 @@ class App extends React.Component {
 
     deleteWord(word) {
         this.state.undoDeleteStore.put(word);
+        this.state.deleteOnServerStack.push(word);
         this.state.dict.deleteWord(word.word);
         const newDict = new Dictionary(this.state.dict);
         this.setState({
@@ -285,18 +292,43 @@ class App extends React.Component {
     }
 
     save() {
+        const handleDeletion = (callback) => {
+            let {deleteOnServerStack} = this.state;
+
+            if (deleteOnServerStack.length <= 0) {
+                callback();
+                return;
+            }
+
+            this.setState({
+              saveText: 'Saving deletions...'
+            }, () => {
+                Api.deleteWords(deleteOnServerStack)
+                    .then((res) => {
+                        this.setState({
+                            deleteOnServerStack: []
+                        }, callback);
+                    })
+                    .catch((error) => {
+                        console.log(JSON.stringify(error));
+                    });
+            });
+        };
+
         this.setState({
             saveText: 'Saving...'
         }, () => {
             Api.save(this.state.dict)
                 .then((res) => {
-                    this.setState({
-                        saveText: 'Saved.'
-                    }, () => setTimeout(() => {
+                    handleDeletion(() => {
                         this.setState({
-                            saveText: 'Save'
-                        });
-                    }, 3000))
+                            saveText: 'Saved.'
+                        }, () => setTimeout(() => {
+                            this.setState({
+                                saveText: 'Save'
+                            });
+                        }, 3000))
+                    });
                 })
                 .catch((error) => {
                     console.log(JSON.stringify(error));

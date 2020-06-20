@@ -24,8 +24,8 @@ const save = (req, res) => {
     db.once('open', () => {
         if(words.length <= 0){
             mongoose.disconnect();
-            res.status(500);
-            res.json({msg: 'failed: '+error});
+            res.status(400);
+            res.json({msg: 'Nothing to save.'});
             return;
         }
 
@@ -72,14 +72,63 @@ const load = (req, res) => {
     })
 };
 
+const deleteAll = (req, res) => {
+    const words = req.body.words;
+
+    res.set({'Access-Control-Allow-Origin': '*'});
+
+    mongoose.connect('mongodb://localhost:27017/nld', {useNewUrlParser: true, useUnifiedTopology: true});
+    const db = mongoose.connection;
+    db.once('open', () => {
+        if(words.length <= 0){
+            mongoose.disconnect();
+            res.status(400);
+            res.json({msg: 'nothing to delete:'});
+            return;
+        }
+
+        let i = 0;
+
+        const callback = (success) => {
+            if (success) {
+                i = i + 1;
+
+                if(i >= words.length){
+                    mongoose.disconnect();
+                    res.status(200);
+                    res.json({msg: 'success'});
+                } else {
+                    deleteWord(words[i], callback);
+                }
+            } else {
+                mongoose.disconnect();
+                res.status(500);
+                res.json({msg: 'failed: '+error});
+            }
+        };
+
+        deleteWord(words[i], callback)
+    })
+};
+
 function saveWord(word, callback){
-    Word.findOneAndUpdate({word: word.word}, {...word}, {upsert: true}, (err) => {
+    Word.findOneAndUpdate({word: word.word}, {...word}, {upsert: true, useFindAndModify: false}, (err) => {
         if (err) {
             callback(false);
         } else {
             callback(true);
         }
     });
+}
+
+function deleteWord(word, callback){
+    Word.findOneAndDelete({word: word.word}, {useFindAndModify: false}, (err) => {
+        if (err) {
+            callback(false);
+        } else {
+            callback(true);
+        }
+    })
 }
 
 function toMongoWord(word) {
@@ -90,4 +139,4 @@ function toMongoWord(word) {
     });
 }
 
-module.exports = { save, load };
+module.exports = { save, load, deleteAll };

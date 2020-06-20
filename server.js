@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
-const { save, load} = require('./endpoints/database');
+const { save, load, deleteAll } = require('./endpoints/database');
 
 const app = express();
 const port = process.env.PORT || 6160;
@@ -15,6 +15,8 @@ app.get('/', (req, res) => {
 
 app.post('/api/save', save);
 app.get('/api/load', load);
+app.post('/api/delete', deleteAll);
+
 
 //start the server
 app.listen(port, () => {

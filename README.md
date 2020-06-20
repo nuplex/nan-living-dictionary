@@ -20,7 +20,8 @@ Lots of scratch code here right now
 - ~~Fix combine allows duplicates~~
 - ~~Make duplicate checks infinite-safe~~
 ~~- Save and retrieve from storage~~
-- Fix deletions not being saved
+~~- Fix deletions not being saved~~
+- Add word to dictionary without generation
 - Add error messaging component on page
 - Add Adjective/Verb type to root generation
 - Add non-roots to root generation
@@ -28,8 +29,9 @@ Lots of scratch code here right now
     - Remove option for wild syllables if no WILD
 - Add collision detection to combine roots
 - Fix delete WILD deletes all WILDs
-- Add word to dictionary without generation
 - Add writing native script playground
 - Change undo delete to undo stack of deletions
 - Add error handling to server
 - Enforce lowercase for Nan words
+- Improve save algorithm to only save/delete changes
+- Add option to hide Undo Delete option

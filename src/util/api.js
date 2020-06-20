@@ -13,9 +13,23 @@ async function save(dictionary) {
     return await res.json();
 }
 
+async function deleteWords(words) {
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    const options = {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({words}),
+    };
+
+    const res = await fetch('http://localhost:6160/api/delete', options);
+    return await res.json();
+}
 async function load() {
     const res = await fetch('http://localhost:6160/api/load');
     return await res.json();
 }
 
-export { save, load }
+export { save, load, deleteWords }
