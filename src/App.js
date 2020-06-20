@@ -6,6 +6,7 @@ import RootGenerator from "./RootGenerator";
 import WORD_TYPES from "./word-types";
 import RootCombiner from "./RootCombiner";
 import UndoDeleteStore from "./util/undo-delete-store";
+import * as Api from './util/api';
 
 class App extends React.Component {
     constructor(props) {
@@ -13,17 +14,18 @@ class App extends React.Component {
 
         this.state = {
             adjectiveActive: false,
-            verbActive: false,
-            wordType: '',
-            syllables: 2,
-            english: '???',
-            dict: new Dictionary(),
             canUndo: false,
-            undoDeleteStore: new UndoDeleteStore(),
             changingEnglishIndex: -1,
             changingEnglishValue: '',
             currentTab: 0,
-            search: ''
+            dict: new Dictionary(),
+            english: '???',
+            saveText: 'Save',
+            search: '',
+            syllables: 2,
+            undoDeleteStore: new UndoDeleteStore(),
+            verbActive: false,
+            wordType: '',
         };
 
         this.add = this.add.bind(this);
@@ -37,8 +39,21 @@ class App extends React.Component {
         this.onLeaveSearch = this.onLeaveSearch.bind(this);
         this.onSearch = this.onSearch.bind(this);
         this.onUndoDelete = this.onUndoDelete.bind(this);
+        this.save = this.save.bind(this);
         this.stopChangingEnglish = this.stopChangingEnglish.bind(this);
         this.toggleActive = this.toggleActive.bind(this);
+    }
+
+    componentDidMount() {
+        Api.load()
+            .then((res) => {
+                this.setState({
+                    dict: new Dictionary(res.dictionary)
+                });
+            })
+            .catch((error) => {
+                console.log(JSON.stringify(error));
+            });
     }
 
     add() {
@@ -269,8 +284,28 @@ class App extends React.Component {
         )
     }
 
+    save() {
+        this.setState({
+            saveText: 'Saving...'
+        }, () => {
+            Api.save(this.state.dict)
+                .then((res) => {
+                    this.setState({
+                        saveText: 'Saved.'
+                    }, () => setTimeout(() => {
+                        this.setState({
+                            saveText: 'Save'
+                        });
+                    }, 3000))
+                })
+                .catch((error) => {
+                    console.log(JSON.stringify(error));
+                });
+        })
+    }
+
     render() {
-        const {currentTab, dict, search, canUndo} = this.state;
+        const {currentTab, dict, saveText, search, canUndo} = this.state;
         let tabActive = (tab) => tab === currentTab ? 'tab__active':'tab';
 
         return (
@@ -285,6 +320,8 @@ class App extends React.Component {
                     {` `}
                     <span className={tabActive(2)}
                           onClick={() => this.changeTab(2)}>Search</span>
+                    {` `}
+                    <span className="save" onClick={this.save}>{saveText}</span>
                 </div>
                 {currentTab === 0 &&
                     this.renderMainGenerator()

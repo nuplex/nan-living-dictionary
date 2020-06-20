@@ -2,8 +2,12 @@ import WORD_TYPES from "../word-types";
 
 export default class Dictionary{
     constructor(copyFrom) {
-        copyFrom = (copyFrom instanceof Dictionary) ? copyFrom : null;
-        this.words = copyFrom ? copyFrom.getWords() : [];
+        if (Array.isArray(copyFrom)) {
+            this.words = [...copyFrom];
+        } else {
+            copyFrom = (copyFrom instanceof Dictionary) ? copyFrom : null;
+            this.words = copyFrom ? copyFrom.getWords() : [];
+        }
     }
 
     addWord(word, english, type) {

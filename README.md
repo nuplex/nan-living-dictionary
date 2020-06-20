@@ -19,7 +19,9 @@ Lots of scratch code here right now
 - ~~Add undo delete functionality~~
 - ~~Fix combine allows duplicates~~
 - ~~Make duplicate checks infinite-safe~~
-- Save and retrieve from storage
+~~- Save and retrieve from storage~~
+- Fix deletions not being saved
+- Add error messaging component on page
 - Add Adjective/Verb type to root generation
 - Add non-roots to root generation
 - Add generate syllable for individual wild cards in combine roots
@@ -29,3 +31,5 @@ Lots of scratch code here right now
 - Add word to dictionary without generation
 - Add writing native script playground
 - Change undo delete to undo stack of deletions
+- Add error handling to server
+- Enforce lowercase for Nan words
