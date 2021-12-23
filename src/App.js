@@ -7,10 +7,18 @@ import WORD_TYPES from "./word-types";
 import RootCombiner from "./RootCombiner";
 import UndoDeleteStore from "./util/undo-delete-store";
 import * as Api from './util/api';
+import WordCreator from './WordCreator';
 
 class App extends React.Component {
     constructor(props) {
         super(props);
+        this.TABS = {
+            LESSONS: 0,
+            ADD: 1,
+            GENERATE: 2,
+            COMBINE: 3,
+            SEARCH: 4
+        };
 
         this.state = {
             adjectiveActive: false,
@@ -30,6 +38,7 @@ class App extends React.Component {
         };
 
         this.add = this.add.bind(this);
+        this.cancelWordSelection = this.cancelWordSelection.bind(this);
         this.changeEnglish = this.changeEnglish.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.deleteWord = this.deleteWord.bind(this);
@@ -69,6 +78,13 @@ class App extends React.Component {
         this.onChangeDictionary(word, this.state.english, this.state.wordType);
     }
 
+    cancelWordSelection() {
+        this.setState({
+            changingEnglishIndex: -1,
+            changingEnglishValue: ''
+        });
+    }
+
     changeEnglish(index, value) {
         if (this.state.changingEnglishIndex === -1) {
             this.setState({
@@ -81,7 +97,7 @@ class App extends React.Component {
     changeTab(tab) {
         if(this.state.currentTab !== tab){
 
-            if (this.state.currentTab === 2) {
+            if (this.state.currentTab === 3) {
                 this.onLeaveSearch();
             }
 
@@ -190,6 +206,15 @@ class App extends React.Component {
         })
     }
 
+    renderAdd() {
+        return (
+            <WordCreator
+                dictionary={this.state.dict}
+                onChangeDictionary={this.onChangeDictionary}
+            />
+        )
+    }
+
     renderDictionary(search) {
         const {dict, changingEnglishIndex, changingEnglishValue} = this.state;
 
@@ -222,6 +247,7 @@ class App extends React.Component {
                                     />
                                     <button onClick={() => this.stopChangingEnglish(entry.word)}>Change English</button>
                                     <button onClick={() => this.deleteWord(entry)}>Delete Word</button>
+                                    <button onClick={() => this.cancelWordSelection()}>Cancel</button>
                                 </div>
                             }
                             {isRoot &&
@@ -339,6 +365,7 @@ class App extends React.Component {
     render() {
         const {currentTab, dict, saveText, search, canUndo} = this.state;
         let tabActive = (tab) => tab === currentTab ? 'tab__active':'tab';
+        let showDictionary = currentTab !== 2;
 
         return (
             <div className="main">
@@ -351,23 +378,23 @@ class App extends React.Component {
                           onClick={() => this.changeTab(1)}>Combine</span>
                     {` `}
                     <span className={tabActive(2)}
-                          onClick={() => this.changeTab(2)}>Search</span>
+                          onClick={() => this.changeTab(2)}>Add</span>
+                    {` `}
+                    <span className={tabActive(3)}
+                          onClick={() => this.changeTab(3)}>Search</span>
                     {` `}
                     <span className="save" onClick={this.save}>{saveText}</span>
                 </div>
-                {currentTab === 0 &&
-                    this.renderMainGenerator()
-                }
+                {currentTab === 0 && this.renderMainGenerator()}
                 {currentTab === 1 &&
                     <RootCombiner
                         dict={dict}
                         onChangeDictionary={this.onChangeDictionary}
                     />
                 }
-                {currentTab === 2 &&
-                    this.renderSearch()
-                }
-                {this.renderDictionary(search === '' ? null : search)}
+                {currentTab === 2 && this.renderAdd()}
+                {currentTab === 3 && this.renderSearch()}
+                {showDictionary && this.renderDictionary(search === '' ? null : search)}
                 {canUndo &&
                     <div className="undo-delete-button"
                          onClick={this.onUndoDelete}

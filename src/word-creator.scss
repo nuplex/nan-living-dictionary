@@ -1,0 +1,21 @@
+.word-creator{
+  &__just-added-title {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  &__root-search {
+    margin-bottom: 4px;
+  }
+
+  &__root-search-cont {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  &__roots-used-title {
+    font-size: 18px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+}

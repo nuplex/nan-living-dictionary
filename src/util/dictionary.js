@@ -35,6 +35,10 @@ export default class Dictionary{
 
     }
 
+    findWord(word) {
+        return this.words.some(w => w.word === word);
+    }
+
     getOnlyWords() {
         return this.words.map(w => w.word);
     }
