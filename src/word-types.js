@@ -1,8 +1,8 @@
 const WORD_TYPES = {
-    ADJECTIVE: 'ADJ',
+    MODIFIER: 'MODIFIER',
     NUMERAL: 'NUMERAL',
     ROOT: 'ROOT',
-    VERB: 'VRB'
+    VERB: 'VERB'
 };
 
 export default WORD_TYPES;

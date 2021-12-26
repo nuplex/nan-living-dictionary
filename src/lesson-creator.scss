@@ -1,0 +1,21 @@
+.lesson-creator {
+  &__editor {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-width: 650px;
+    width: 40vw;
+  }
+
+  &__number {
+    &__input {
+      width: 50px
+    }
+  }
+
+  &__title {
+    &__input {
+      width: 400px;
+    }
+  }
+
+}

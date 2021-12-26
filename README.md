@@ -39,3 +39,5 @@ Lots of scratch code here right now
 - Improve save algorithm to only save/delete changes
 - Add option to hide Undo Delete option
 - Add Lessons
+- Add ability to add lessons
+- Add ability to look up word definition in lesson

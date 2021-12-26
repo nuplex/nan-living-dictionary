@@ -16,7 +16,7 @@ class WordCreator extends React.Component {
             rootsUsed: [],
             typeOptions: [
                 {name: '', value: undefined},
-                {name: 'Adjective', value: WORD_TYPES.ADJECTIVE},
+                {name: 'Modifier', value: WORD_TYPES.MODIFIER},
                 {name: 'Verb', value: WORD_TYPES.VERB},
                 {name: 'Root', value: WORD_TYPES.ROOT}
             ],
