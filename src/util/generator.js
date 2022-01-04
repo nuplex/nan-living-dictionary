@@ -1,3 +1,5 @@
+import WORD_TYPES from '../word-types';
+
 export default class Generator {
     constructor() {
         this.vowels = ['a', 'u', 'i'];
@@ -15,10 +17,10 @@ export default class Generator {
         let word = '';
 
         switch(type){
-            case 'ADJ':
+            case WORD_TYPES.MODIFIER:
                 word += this.adjective;
                 break;
-            case 'VRB':
+            case WORD_TYPES.VERB:
                 word += this.verb;
                 break;
             default:

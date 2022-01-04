@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Generator from './util/generator.js';
 import './root-combiner.scss';
 import Dictionary from "./util/dictionary";
+import WORD_TYPES from "./word-types";
 
 class RootCombiner extends React.Component{
     constructor(props){
@@ -14,7 +15,15 @@ class RootCombiner extends React.Component{
             wildSyllables: 2,
             english: '???',
             wordExists: false,
-            maxedOutOnGenerating: false
+            maxedOutOnGenerating: false,
+            typeOptions: [
+                {name: '', value: null},
+                {name: 'Noun', value: WORD_TYPES.NOUN},
+                {name: 'Modifier', value: WORD_TYPES.MODIFIER},
+                {name: 'Verb', value: WORD_TYPES.VERB},
+                {name: 'Root', value: WORD_TYPES.ROOT}
+            ],
+            wordType: null
         };
 
         this.add = this.add.bind(this);
@@ -22,6 +31,7 @@ class RootCombiner extends React.Component{
         this.removeRoot = this.removeRoot.bind(this);
         this.onChangeWildSyllables = this.onChangeWildSyllables.bind(this);
         this.onChangeEnglish = this.onChangeEnglish.bind(this);
+        this.onChangeType = this.onChangeType.bind(this);
     }
 
     componentDidMount(){
@@ -59,12 +69,12 @@ class RootCombiner extends React.Component{
             return;
         }
 
-        this.props.onChangeDictionary(word, this.state.english, null);
+        this.props.onChangeDictionary(word, this.state.english, null, this.state.wordType);
     }
 
     addRoot(root){
         this.setState({
-            currentRoots: [root, ...this.state.currentRoots]
+            currentRoots: [...this.state.currentRoots, root]
         })
     }
 
@@ -87,8 +97,14 @@ class RootCombiner extends React.Component{
         });
     }
 
+    onChangeType(event) {
+        this.setState({
+            wordType: event.target.value
+        })
+    }
+
     render(){
-        const {currentRoots, english, maxedOutOnGenerating, roots, wildSyllables, wordExists} = this.state;
+        const {currentRoots, english, maxedOutOnGenerating, roots, typeOptions, wildSyllables, wordExists} = this.state;
 
         return (
             <div className="root-combiner-cont">
@@ -116,6 +132,22 @@ class RootCombiner extends React.Component{
                                onChange={this.onChangeEnglish}
                                value={english}
                         />
+                    </label>
+                    <label htmlFor="type">
+                        <select
+                            name="type"
+                            onChange={this.onChangeType}
+                        >
+                            {typeOptions.map((type, i) => {
+                                return (
+                                    <option key={type.value + i}
+                                            value={type.value}
+                                    >
+                                        {type.name}
+                                    </option>
+                                )
+                            })}
+                        </select>
                     </label>
                     <button onClick={this.add}
                             disabled={currentRoots.length < 2}

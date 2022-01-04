@@ -5,6 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 import LessonBook from './util/lesson-book';
 import './lesson-creator.scss';
 import Lesson from "./util/lesson";
+import LESSON_MODES from "./lesson-modes";
 
 class LessonCreator extends React.Component {
     constructor(props){
@@ -23,6 +24,7 @@ class LessonCreator extends React.Component {
         };
 
         this.state = {
+            mode: LESSON_MODES.ADD,
             number: 1,
             text: '',
             title: ''
@@ -32,7 +34,21 @@ class LessonCreator extends React.Component {
         this.onAddLesson = this.onAddLesson.bind(this);
         this.onChangeTitle = this.onChangeTitle.bind(this);
         this.onChangeNumber = this.onChangeNumber.bind(this);
+        this.onEditLesson = this.onEditLesson.bind(this);
         this.onTextChange = this.onTextChange.bind(this);
+    }
+
+    componentDidMount() {
+        const {lesson} = this.props;
+
+        if (this.props.mode === LESSON_MODES.EDIT && this.props.lesson !== null) {
+            this.setState({
+                mode: LESSON_MODES.EDIT,
+                number: lesson.getNumber(),
+                text: lesson.getText(),
+                title: lesson.getTitle()
+            });
+        }
     }
 
     canAdd() {
@@ -43,7 +59,7 @@ class LessonCreator extends React.Component {
         let lessonExists = this.props.lessonBook.getLessonByTitle(title) !== null;
         let numberExists = this.props.lessonBook.getLessonByNumber(this.state.number) !== null;
 
-        return hasText && hasTitle && !lessonExists && !numberExists;
+        return hasText && hasTitle && !lessonExists && !numberExists && this.state.mode !== LESSON_MODES.EDIT;
     }
 
     onAddLesson() {
@@ -67,6 +83,19 @@ class LessonCreator extends React.Component {
         });
     }
 
+    onEditLesson() {
+        let newLesson = new Lesson(this.state.number, this.state.text, this.state.title);
+        let oldLesson = this.props.lesson;
+
+        newLesson.setClientCreatedAt(oldLesson.getClientCreatedAt());
+        newLesson.setClientId(oldLesson.getClientId());
+        newLesson.setCreatedAt(oldLesson.getCreatedAt());
+        newLesson.setLessonGroup(oldLesson.getLessonGroup());
+        newLesson.setUpdatedAt(oldLesson.getCreatedAt());
+
+        this.props.onChangeLessonBook(newLesson, LESSON_MODES.EDIT);
+    }
+
     onTextChange(value) {
         this.setState({
             text: value
@@ -74,7 +103,7 @@ class LessonCreator extends React.Component {
     }
 
     render() {
-        let {number, text, title} = this.state;
+        let {mode, number, text, title} = this.state;
 
         return (
             <div>
@@ -109,19 +138,30 @@ class LessonCreator extends React.Component {
                         value={text}
                     />
                 </div>
-                <button
-                    onClick={this.onAddLesson}
-                    disabled={!this.canAdd()}
-                >
-                    Add Lesson
-                </button>
+                {mode === 'ADD' &&
+                    <button
+                        onClick={this.onAddLesson}
+                        disabled={!this.canAdd()}
+                    >
+                        Add Lesson
+                    </button>
+                }
+                {mode === 'EDIT' &&
+                    <button
+                        onClick={this.onEditLesson}
+                    >
+                        Submit Changes
+                    </button>
+                }
             </div>
         )
     }
 }
 
 LessonCreator.propTypes = {
+    lesson: PropTypes.instanceOf(Lesson),
     lessonBook: PropTypes.instanceOf(LessonBook).isRequired,
+    mode: PropTypes.string,
     onChangeLessonBook: PropTypes.func.isRequired
 };
 

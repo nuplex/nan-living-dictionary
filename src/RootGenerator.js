@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Generator from './util/generator.js';
 import './App.scss';
 import Dictionary from "./util/dictionary";
+import WORD_TYPES from './word-types';
 
 class RootGenerator extends React.Component{
     constructor(props) {
@@ -20,9 +21,9 @@ class RootGenerator extends React.Component{
 
     add(){
         let gen = new Generator();
-        let word = gen.createWord(this.state.syllables, this.state.english, 'ROOT', this.props.dict.getOnlyWords());
+        let word = gen.createWord(this.state.syllables, this.state.english, WORD_TYPES.ROOT, this.props.dict.getOnlyWords());
 
-        this.props.onChangeDictionary(word, this.state.english, 'ROOT');
+        this.props.onChangeDictionary(word, this.state.english, null, WORD_TYPES.ROOT);
     }
 
     onChangeSyllables(event) {

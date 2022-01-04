@@ -15,6 +15,7 @@ export default class LessonBook {
         lessons.forEach(lesson => {
             let realLesson = Lesson.create(lesson);
             let lessonGroup = realLesson.getLessonGroup();
+
             if (lessonBook.lessons[lessonGroup] !== undefined) {
                 lessonBook.lessons[lessonGroup].push(realLesson);
             } else {
@@ -34,6 +35,16 @@ export default class LessonBook {
         } else {
             this.lessons[group] = [lesson];
         }
+    }
+
+    // This method is the most useful as this value cannot be changed and exists before upload
+    getLessonByClientId(clientId) {
+        let lesson;
+
+        lesson = this.getLessonsAs1DArray().find(l => l.clientId === clientId);
+
+        return lesson === undefined ? null : lesson;
+
     }
 
     getLessonByNumber(number) {
@@ -65,5 +76,16 @@ export default class LessonBook {
         });
 
         return lessons;
+    }
+
+    updateLesson(lesson) {
+        let lessonExists = this.getLessonByClientId(lesson.getClientId()) !== null;
+
+        if (lessonExists) {
+            let index = this.lessons[lesson.getLessonGroup()].findIndex(l => l.getClientId() === lesson.getClientId());
+            this.lessons[lesson.getLessonGroup()][index] = lesson; // note this is an overwrite, the clientId may be the same but other values may not
+        } else {
+            throw new Error('Lesson does not exist to update');
+        }
     }
 }

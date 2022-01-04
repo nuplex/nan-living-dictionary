@@ -4,6 +4,7 @@ const wordSchema = new mongoose.Schema(
     {
         word: String,
         english: String,
+        roots: [String],
         type: String
     },
     {
@@ -14,6 +15,7 @@ const wordSchema = new mongoose.Schema(
 const lessonSchema = new mongoose.Schema(
     {
         clientCreatedAt: Date,
+        clientId: String,
         lessonGroup: String,
         name: String,
         number: String,
@@ -122,7 +124,7 @@ const load = (req, res) => {
                 res.status(400);
                 res.json({msg: 'failed: ' + err});
             } else {
-                res.json({dictionary: words.map(w => ({word: w.word, english: w.english, type: w.type}))});
+                res.json({dictionary: words.map(w => ({word: w.word, english: w.english, roots: w.roots, type: w.type}))});
             }
         });
     })
@@ -143,6 +145,7 @@ const loadLessons = (req, res) => {
             } else {
                 res.json({lessons: lessons.map(lesson => ({
                         clientCreatedAt: lesson.clientCreatedAt,
+                        clientId: lesson.clientId,
                         createdAt: lesson.createdAt,
                         lessonGroup: lesson.lessonGroup,
                         number: lesson.number,
@@ -200,7 +203,7 @@ function saveLesson(lesson, callback) {
     delete lessonCopy.createdAt;
     delete lessonCopy.updatedAt;
 
-    Lesson.findOneAndUpdate({clientCreatedAt: lesson.clientCreatedAt}, {...lessonCopy}, {upsert: true, useFindAndModify: false}, (err) => {
+    Lesson.findOneAndUpdate({clientId: lesson.clientId}, {...lessonCopy}, {upsert: true, useFindAndModify: false}, (err) => {
        if (err) {
            callback(false, err);
        } else {

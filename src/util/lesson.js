@@ -1,6 +1,9 @@
+import Generator from "./generator";
+
 export default class Lesson {
     constructor(number, text, title) {
         this.clientCreatedAt = new Date();
+        this.clientId = Lesson.generateId(number, text, title);
         this.createdAt = null;
         this.updatedAt = null;
         this.lessonGroup = 'DEFAULT';
@@ -9,15 +12,20 @@ export default class Lesson {
         this.title = title;
     }
 
-    static create({clientCreatedAt, createdAt, updatedAt, lessonGroup, number, text, title}) {
+    static create({clientId, clientCreatedAt, createdAt, updatedAt, lessonGroup, number, text, title}) {
         let lesson = new Lesson(number, text, title);
 
+        lesson.clientId = clientId;
         lesson.clientCreatedAt = clientCreatedAt;
         lesson.createdAt = createdAt;
         lesson.updatedAt = updatedAt;
         lesson.lessonGroup = lessonGroup;
 
         return lesson;
+    }
+
+    static generateId(number, text, title) {
+        return (new Generator()).createWord(12, null, null, null) + Date.now() + text.length + title.length + number;
     }
 
     changeNumber(number) {
@@ -34,6 +42,14 @@ export default class Lesson {
 
     getCreatedAt() {
         return this.createdAt;
+    }
+
+    getClientId() {
+        return this.clientId;
+    }
+
+    getClientCreatedAt() {
+        return this.clientCreatedAt;
     }
 
     getLessonGroup() {
@@ -56,19 +72,23 @@ export default class Lesson {
         return this.updatedAt;
     }
 
-    setCreatedAt(createdAt) {
-        this.createdAt = createdAt;
+    setClientCreatedAt(value) {
+        this.clientCreatedAt = value;
     }
 
-    setId(id) {
-        this.id = id;
+    setClientId(value) {
+        this.clientId = value;
     }
 
-    setLessonGroup(lessonGroup) {
-        this.lessonGroup = lessonGroup;
+    setCreatedAt(value) {
+        this.createdAt = value;
     }
 
-    setUpdatedAt(updatedAt) {
-        this.updatedAt = updatedAt;
+    setUpdatedAt(value) {
+        this.updatedAt = value;
+    }
+
+    setLessonGroup(value) {
+        this.lessonGroup = value;
     }
 }

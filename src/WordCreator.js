@@ -16,6 +16,7 @@ class WordCreator extends React.Component {
             rootsUsed: [],
             typeOptions: [
                 {name: '', value: undefined},
+                {name: 'Noun', value: WORD_TYPES.NOUN},
                 {name: 'Modifier', value: WORD_TYPES.MODIFIER},
                 {name: 'Verb', value: WORD_TYPES.VERB},
                 {name: 'Root', value: WORD_TYPES.ROOT}
@@ -44,17 +45,20 @@ class WordCreator extends React.Component {
         let word = {
             english: this.state.english,
             nan: this.state.nan,
+            roots: this.state.rootsUsed,
             type: this.state.wordType
         };
 
         this.setState({
             english: '',
             nan: '',
+            rootSearch: '',
+            rootsUsed: [],
             wordType: null,
             wordCache: [...this.state.wordCache, word]
         });
 
-        this.props.onChangeDictionary(word.nan, word.english, word.type);
+        this.props.onChangeDictionary(word.nan, word.english, word.roots, word.type);
     }
 
     onAddRoot(root){
@@ -90,7 +94,7 @@ class WordCreator extends React.Component {
     onChangeType(event) {
         this.setState({
             wordType: event.target.value
-        })
+        });
     }
 
     onRemoveRoot(root) {
@@ -98,7 +102,7 @@ class WordCreator extends React.Component {
 
         this.setState({
             rootsUsed: rootsUsed
-        })
+        });
     }
 
     onRootSearch(event) {

@@ -10,8 +10,9 @@ export default class Dictionary{
         }
     }
 
-    addWord(word, english, type) {
-        this.words.push({word, english, type});
+    addWord(word, english, roots, type) {
+        let wordsOnlyRoots = roots ? roots.map(r => r.word) : null;
+        this.words.push({word, english, wordsOnlyRoots, type});
         this.words.sort((a, b) => {
             return a.word.localeCompare(b.word);
         });

@@ -5,6 +5,7 @@ import * as Api from './util/api';
 import Dictionary from "./util/dictionary";
 import LessonBook from "./util/lesson-book";
 import LessonCreator from "./LessonCreator";
+import LESSON_MODES from "./lesson-modes";
 import LessonViewer from "./LessonViewer";
 import RootGenerator from "./RootGenerator";
 import RootCombiner from "./RootCombiner";
@@ -18,6 +19,7 @@ class App extends React.Component {
         this.TABS = {
             LESSONS: 10,
             ADD_LESSON: 11,
+            EDIT_LESSON: 12,
             ADD_WORD: 2,
             GENERATE: 3,
             COMBINE: 4,
@@ -35,9 +37,12 @@ class App extends React.Component {
             english: '???',
             lessonViewerLesson: null,
             lessonBook: new LessonBook(),
+            nounActive: false,
             saveText: 'Save',
             search: '',
+            showLessonEditor: false,
             showLessonViewer: false,
+            showLoading: false,
             syllables: 2,
             undoDeleteStore: new UndoDeleteStore(),
             verbActive: false,
@@ -55,6 +60,8 @@ class App extends React.Component {
         this.onChangeLessonBook = this.onChangeLessonBook.bind(this);
         this.onChangeSyllables = this.onChangeSyllables.bind(this);
         this.onCloseLessonViewer = this.onCloseLessonViewer.bind(this);
+        this.onCloseLessonEditor = this.onCloseLessonEditor.bind(this);
+        this.onEditLesson = this.onEditLesson.bind(this);
         this.onLeaveSearch = this.onLeaveSearch.bind(this);
         this.onSearch = this.onSearch.bind(this);
         this.onUndoDelete = this.onUndoDelete.bind(this);
@@ -97,7 +104,7 @@ class App extends React.Component {
         let gen = new Generator();
         let word = gen.createWord(this.state.syllables, this.state.english, this.state.wordType, this.state.dict.getOnlyWords());
 
-        this.onChangeDictionary(word, this.state.english, this.state.wordType);
+        this.onChangeDictionary(word, this.state.english, null, this.state.wordType);
     }
 
     cancelWordSelection() {
@@ -119,8 +126,15 @@ class App extends React.Component {
     changeTab(tab) {
         if(this.state.currentTab !== tab){
 
-            if (this.state.currentTab === 3) {
+            if (this.state.currentTab === this.TABS.SEARCH) {
                 this.onLeaveSearch();
+            }
+
+            if (this.state.currentTab === this.TABS.EDIT_LESSON) {
+                this.setState({
+                    lessonViewerLesson: null,
+                    showLessonEditor: false
+                });
             }
 
             this.setState({
@@ -141,9 +155,9 @@ class App extends React.Component {
         });
     }
 
-    onChangeDictionary(word, english, type) {
+    onChangeDictionary(word, english, roots, type) {
         let newDict = new Dictionary(this.state.dict);
-        newDict.addWord(word, english, type);
+        newDict.addWord(word, english, roots, type);
 
         this.setState({
             dict: newDict,
@@ -151,9 +165,14 @@ class App extends React.Component {
         });
     }
 
-    onChangeLessonBook(lesson) {
+    onChangeLessonBook(lesson, mode) {
         let newLessonBook = new LessonBook(this.state.lessonBook);
-        newLessonBook.addLesson(lesson);
+
+        if (mode === LESSON_MODES.EDIT) {
+            newLessonBook.updateLesson(lesson);
+        } else {
+            newLessonBook.addLesson(lesson);
+        }
 
 
         this.setState({
@@ -179,9 +198,29 @@ class App extends React.Component {
         });
     }
 
+    onCloseLessonEditor() {
+        this.setState({
+            lessonViewerLesson: null,
+            showLessonEditor: false
+        }, () => this.changeTab(this.TABS.LESSONS));
+    }
+
     onCloseLessonViewer() {
         this.setState({
             showLessonViewer: false
+        });
+    }
+
+    onEditLesson(lesson) {
+        this.setState({
+            lessonViewerLesson: lesson,
+            showLessonEditor: true,
+            showLoading: true
+        }, () => {
+            this.changeTab(this.TABS.EDIT_LESSON);
+            this.setState({
+                showLoading: false
+            });
         });
     }
 
@@ -205,24 +244,38 @@ class App extends React.Component {
     }
 
     toggleActive(type) {
-        if ((this.state.adjectiveActive && !this.state.verbActive && type === 'VRB') ||
-            (!this.state.adjectiveActive && this.state.verbActive && type === 'ADJ')
+        if ((this.state.adjectiveActive && type === WORD_TYPES.MODIFIER) ||
+            (this.state.verbActive && type === WORD_TYPES.VERB) ||
+            (this.state.nounActive && type === WORD_TYPES.NOUN)
         ) {
             this.setState({
                 adjectiveActive: false,
+                nounActive: false,
                 verbActive: false,
                 wordType: ''
             });
         } else {
             switch (type) {
-                case 'ADJ':
+                case WORD_TYPES.MODIFIER:
                     this.setState({
                         adjectiveActive: !this.state.adjectiveActive,
+                        nounActive: false,
+                        verbActive:false,
                         wordType: type
                     });
                     break;
-                case 'VRB':
+                case WORD_TYPES.NOUN:
                     this.setState({
+                        adjectiveActive: false,
+                        nounActive: !this.state.nounActive,
+                        verbActive:false,
+                        wordType: type
+                    });
+                    break;
+                case WORD_TYPES.VERB:
+                    this.setState({
+                        adjectiveActive: false,
+                        nounActive: false,
                         verbActive: !this.state.verbActive,
                         wordType: type
                     });
@@ -322,6 +375,12 @@ class App extends React.Component {
                             >
                                 {`${lesson.getNumber()} - ${lesson.getTitle()}`}
                             </span>
+                            <button
+                                className="lessonbook__lesson-edit-button"
+                                onClick={() => this.onEditLesson(lesson)}
+                            >
+                                Edit
+                            </button>
                         </div>
                     )
                 })}
@@ -330,9 +389,10 @@ class App extends React.Component {
     }
 
     renderMainGenerator() {
-        const {adjectiveActive, verbActive, dict, syllables, english} = this.state;
+        const {adjectiveActive, nounActive, verbActive, dict, syllables, english} = this.state;
         const adjectiveClass = "option" + (adjectiveActive ? "__active" : "");
         const verbClass = "option" + (verbActive ? "__active" : "");
+        const nounClass = "option" + (nounActive ? "__active" : "");
 
         return (
             <React.Fragment>
@@ -352,13 +412,17 @@ class App extends React.Component {
                         />
                     </label>
                     <div className="type">
-                        <div className={adjectiveClass}
-                             onClick={() => this.toggleActive('ADJ')}
-                        >Adjective
+                        <div className={nounClass}
+                             onClick={() => this.toggleActive(WORD_TYPES.NOUN)}
+                        >Noun
                         </div>
                         <div className={verbClass}
-                             onClick={() => this.toggleActive('VRB')}
+                             onClick={() => this.toggleActive(WORD_TYPES.VERB)}
                         >Verb
+                        </div>
+                        <div className={adjectiveClass}
+                             onClick={() => this.toggleActive(WORD_TYPES.MODIFIER)}
+                        >Modifier
                         </div>
                     </div>
                     <button onClick={this.add}>Add Word</button>
@@ -445,13 +509,15 @@ class App extends React.Component {
             dict,
             lessonBook,
             lessonViewerLesson,
+            showLessonEditor,
             showLessonViewer,
+            showLoading,
             saveText,
             search,
             canUndo
         } = this.state;
         let tabActive = (tab) => tab === currentTab ? 'tab__active':'tab';
-        let showDictionary = currentTab !== 2 && currentTab !== this.TABS.ADD_LESSON && currentTab !== this.TABS.LESSONS;
+        let showDictionary = currentTab !== this.TABS.ADD_WORD && currentTab !== this.TABS.ADD_LESSON && currentTab !== this.TABS.LESSONS && currentTab !== this.TABS.EDIT_LESSON;
 
         return (
             <React.Fragment>
@@ -464,8 +530,8 @@ class App extends React.Component {
                         <span className={tabActive(1)}
                               onClick={() => this.changeTab(1)}>Combine</span>
                         {` `}
-                        <span className={tabActive(2)}
-                              onClick={() => this.changeTab(2)}>Add</span>
+                        <span className={tabActive(this.TABS.ADD_WORD)}
+                              onClick={() => this.changeTab(this.TABS.ADD_WORD)}>Add</span>
                         {` `}
                         <span className={tabActive(this.TABS.LESSONS)}
                               onClick={() => this.changeTab(this.TABS.LESSONS)}>Lessons</span>
@@ -473,8 +539,11 @@ class App extends React.Component {
                         <span className={tabActive(this.TABS.ADD_LESSON)}
                               onClick={() => this.changeTab(this.TABS.ADD_LESSON)}>Add Lesson</span>
                         {` `}
-                        <span className={tabActive(3)}
-                            onClick={() => this.changeTab(3)}>Search</span>
+                        {showLessonEditor && <span className={tabActive(this.TABS.EDIT_LESSON)}
+                              onClick={() => this.changeTab(this.TABS.EDIT_LESSON)}>Edit Lesson</span>}
+                        {` `}
+                        <span className={tabActive(this.TABS.SEARCH)}
+                            onClick={() => this.changeTab(this.TABS.SEARCH)}>Search</span>
                         {` `}
                         <span className="save" onClick={this.save}>{saveText}</span>
                     </div>
@@ -485,17 +554,32 @@ class App extends React.Component {
                             onChangeDictionary={this.onChangeDictionary}
                         />
                     }
-                    {currentTab === 2 && this.renderAdd()}
+                    {currentTab === this.TABS.ADD_WORD && this.renderAdd()}
                     {currentTab === this.TABS.LESSONS &&
                         this.renderLessonBook()
                     }
                     {currentTab === this.TABS.ADD_LESSON &&
                         <LessonCreator
+                            mode={LESSON_MODES.ADD}
                             lessonBook={lessonBook}
                             onChangeLessonBook={this.onChangeLessonBook}
                         />
                     }
-                    {currentTab === 3 && this.renderSearch()}
+                    {currentTab === this.TABS.EDIT_LESSON &&
+                        <div>
+                            <span className="warning">Warning: Switching tabs will cause changes to be lost</span>
+                            <LessonCreator
+                                lesson={lessonViewerLesson}
+                                mode={LESSON_MODES.EDIT}
+                                lessonBook={lessonBook}
+                                onChangeLessonBook={this.onChangeLessonBook}
+                            />
+                            <button onClick={this.onCloseLessonEditor}>Close Editor</button>
+                            <br/>
+                        </div>
+                    }
+                    {currentTab === this.TABS.SEARCH && this.renderSearch()}
+                    {showLoading && <div className="loading">Loading...</div> }
                     {showDictionary && this.renderDictionary(search === '' ? null : search)}
                     {canUndo &&
                         <div className="undo-delete-button"
